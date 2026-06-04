@@ -1,0 +1,2063 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fraternity — Professional Commons</title>
+<style>
+/* ─── SYSTEM ─── */
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=IBM+Plex+Sans:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap');
+
+:root {
+  --ink: #0e0e10;
+  --paper: #f7f5f0;
+  --accent: #1a3a5c;
+  --accent-light: #2a527a;
+  --gold: #b8860b;
+  --gold-light: #d4a017;
+  --rule: #d6d0c4;
+  --muted: #7a7570;
+  --soft: #ede9e0;
+  --green: #1a4a2e;
+  --green-bg: #e8f5e9;
+  --red: #c62828;
+  --red-bg: #fff5f5;
+  --blue-bg: #e8eef5;
+  --white: #ffffff;
+  --card-shadow: 0 2px 12px rgba(14,14,16,0.07);
+  --w: 420px;
+  --header-h: 56px;
+  --nav-h: 60px;
+}
+
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'IBM Plex Sans', sans-serif;
+  background: #d4cebc;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  overflow: hidden;
+}
+
+/* ─── DEVICE SHELL ─── */
+.device {
+  width: var(--w);
+  height: 860px;
+  background: var(--paper);
+  border-radius: 44px;
+  overflow: hidden;
+  position: relative;
+  box-shadow: 0 32px 80px rgba(0,0,0,0.35), 0 0 0 1px rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.6);
+}
+
+/* notch */
+.device::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 50%;
+  transform: translateX(-50%);
+  width: 120px; height: 32px;
+  background: #0e0e10;
+  border-radius: 0 0 20px 20px;
+  z-index: 1000;
+}
+
+/* ─── SCREENS ─── */
+.screen {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--paper);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.28s ease, transform 0.28s ease;
+  transform: translateX(30px);
+  overflow: hidden;
+}
+.screen.active {
+  opacity: 1;
+  pointer-events: all;
+  transform: translateX(0);
+}
+.screen.slide-left { transform: translateX(-30px); }
+
+/* ─── STATUS BAR ─── */
+.status-bar {
+  height: 44px;
+  padding: 0 24px;
+  display: flex;
+  align-items: flex-end;
+  padding-bottom: 6px;
+  justify-content: space-between;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--ink);
+  flex-shrink: 0;
+  background: var(--paper);
+  z-index: 10;
+}
+.status-bar.dark { background: var(--accent); color: white; }
+.status-icons { display: flex; gap: 6px; align-items: center; }
+
+/* ─── HEADER ─── */
+.header {
+  height: var(--header-h);
+  display: flex;
+  align-items: center;
+  padding: 0 20px;
+  border-bottom: 1px solid var(--rule);
+  background: var(--paper);
+  flex-shrink: 0;
+  gap: 12px;
+  position: relative;
+  z-index: 10;
+}
+.header.dark {
+  background: var(--accent);
+  border-bottom: none;
+  color: white;
+}
+.header-logo {
+  font-family: 'Playfair Display', serif;
+  font-size: 20px;
+  font-weight: 600;
+  letter-spacing: -0.5px;
+  color: var(--ink);
+  flex: 1;
+}
+.header-logo em { font-style: italic; color: var(--gold); }
+.header.dark .header-logo { color: white; }
+.header-btn {
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--ink);
+  font-size: 18px;
+  transition: background 0.15s;
+}
+.header-btn:hover { background: rgba(0,0,0,0.06); }
+.header.dark .header-btn { color: white; }
+.header-btn:hover.dark { background: rgba(255,255,255,0.1); }
+
+/* badge */
+.notif-badge {
+  position: relative;
+}
+.notif-badge::after {
+  content: '';
+  position: absolute;
+  top: 7px; right: 7px;
+  width: 7px; height: 7px;
+  background: var(--gold);
+  border-radius: 50%;
+  border: 1.5px solid var(--paper);
+}
+
+/* ─── SCROLLABLE BODY ─── */
+.scroll-body {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
+}
+.scroll-body::-webkit-scrollbar { display: none; }
+
+/* ─── BOTTOM NAV ─── */
+.bottom-nav {
+  height: var(--nav-h);
+  background: var(--paper);
+  border-top: 1px solid var(--rule);
+  display: flex;
+  align-items: center;
+  padding: 0 8px;
+  flex-shrink: 0;
+}
+.nav-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: 6px 0;
+  cursor: pointer;
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  font-size: 10px;
+  font-family: 'IBM Plex Mono', monospace;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  transition: color 0.15s;
+  border-radius: 12px;
+}
+.nav-item .icon { font-size: 20px; line-height: 1; }
+.nav-item.active { color: var(--accent); }
+.nav-item:active { background: var(--soft); }
+
+/* ─── FEED TOGGLE ─── */
+.feed-toggle-wrap {
+  padding: 12px 16px 0;
+  transition: opacity 0.2s, transform 0.2s;
+  flex-shrink: 0;
+}
+.feed-toggle-wrap.hidden {
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(-8px);
+}
+.feed-toggle {
+  display: flex;
+  background: var(--soft);
+  border-radius: 10px;
+  padding: 3px;
+  gap: 2px;
+}
+.toggle-btn {
+  flex: 1;
+  padding: 7px 0;
+  text-align: center;
+  font-size: 11.5px;
+  font-weight: 500;
+  font-family: 'IBM Plex Mono', monospace;
+  letter-spacing: 0.5px;
+  color: var(--muted);
+  border: none;
+  background: transparent;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.18s;
+  text-transform: uppercase;
+}
+.toggle-btn.active {
+  background: var(--accent);
+  color: white;
+}
+
+/* ─── POST CARD ─── */
+.post-card {
+  background: var(--white);
+  border-bottom: 1px solid var(--rule);
+  padding: 16px;
+  cursor: pointer;
+  transition: background 0.12s;
+}
+.post-card:active { background: var(--soft); }
+.post-header { display: flex; gap: 10px; margin-bottom: 10px; align-items: flex-start; }
+.avatar {
+  width: 38px; height: 38px;
+  border-radius: 50%;
+  background: var(--accent);
+  flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  color: white;
+  font-family: 'Playfair Display', serif;
+  font-weight: 600;
+  font-size: 15px;
+}
+.avatar.gold { background: var(--gold); }
+.avatar.green { background: var(--green); }
+.post-author-name {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--ink);
+  line-height: 1.3;
+}
+.post-author-tag {
+  font-size: 11px;
+  color: var(--muted);
+  font-family: 'IBM Plex Mono', monospace;
+  margin-top: 2px;
+}
+.post-time {
+  margin-left: auto;
+  font-size: 10.5px;
+  color: var(--muted);
+  font-family: 'IBM Plex Mono', monospace;
+  flex-shrink: 0;
+}
+.post-type-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 9.5px;
+  font-family: 'IBM Plex Mono', monospace;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-weight: 500;
+  margin-bottom: 8px;
+}
+.badge-boom { background: #fff3cd; color: #7d5a00; }
+.badge-quiz { background: var(--blue-bg); color: var(--accent); }
+.badge-hidden { background: #f3e5f5; color: #6a1b9a; }
+.badge-ripple { background: #e0f2f1; color: #00695c; }
+
+.post-text {
+  font-size: 13.5px;
+  line-height: 1.65;
+  color: #2a2620;
+  margin-bottom: 12px;
+}
+
+/* reactions */
+.reactions {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid var(--rule);
+}
+.reaction-btn {
+  display: flex; align-items: center; gap: 5px;
+  padding: 5px 10px;
+  border-radius: 20px;
+  border: 1px solid var(--rule);
+  background: transparent;
+  font-size: 11.5px;
+  color: var(--muted);
+  cursor: pointer;
+  font-family: 'IBM Plex Sans', sans-serif;
+  transition: all 0.15s;
+}
+.reaction-btn:hover, .reaction-btn.active {
+  background: var(--blue-bg);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.reaction-btn .emoji { font-size: 14px; }
+.comment-btn {
+  margin-left: auto;
+  display: flex; align-items: center; gap: 4px;
+  font-size: 11.5px;
+  color: var(--muted);
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-family: 'IBM Plex Sans', sans-serif;
+  padding: 5px 6px;
+}
+.comment-btn:hover { color: var(--accent); }
+
+/* quiz post */
+.quiz-options { margin: 8px 0; display: flex; flex-direction: column; gap: 6px; }
+.quiz-opt {
+  display: flex; align-items: center; gap: 10px;
+  padding: 9px 12px;
+  border: 1px solid var(--rule);
+  border-radius: 8px;
+  font-size: 13px;
+  cursor: pointer;
+  background: var(--white);
+  transition: all 0.15s;
+  color: var(--ink);
+  font-family: 'IBM Plex Sans', sans-serif;
+  text-align: left;
+}
+.quiz-opt:hover { border-color: var(--accent); background: var(--blue-bg); }
+.quiz-opt.selected { border-color: var(--accent); background: var(--blue-bg); color: var(--accent); font-weight: 500; }
+.quiz-opt.correct { border-color: var(--green); background: var(--green-bg); color: var(--green); font-weight: 500; }
+.quiz-opt .opt-key {
+  width: 22px; height: 22px;
+  border-radius: 50%;
+  border: 1.5px solid currentColor;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 10px;
+  font-family: 'IBM Plex Mono', monospace;
+  flex-shrink: 0;
+}
+.quiz-submit {
+  margin-top: 8px;
+  padding: 9px 20px;
+  background: var(--accent);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 12.5px;
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-weight: 500;
+  cursor: pointer;
+  width: 100%;
+  transition: background 0.15s;
+}
+.quiz-submit:hover { background: var(--accent-light); }
+.quiz-result {
+  font-size: 12px;
+  color: var(--green);
+  font-family: 'IBM Plex Mono', monospace;
+  margin-top: 8px;
+  padding: 8px 12px;
+  background: var(--green-bg);
+  border-radius: 6px;
+  display: none;
+}
+
+/* boom label */
+.boom-tag {
+  display: flex; align-items: center; gap: 5px;
+  font-size: 10px;
+  font-family: 'IBM Plex Mono', monospace;
+  color: var(--gold);
+  margin-bottom: 6px;
+  letter-spacing: 0.5px;
+}
+
+/* ─── COMPOSE FAB ─── */
+.fab {
+  position: absolute;
+  bottom: calc(var(--nav-h) + 16px);
+  right: 20px;
+  width: 52px; height: 52px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: white;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 4px 16px rgba(26,58,92,0.4);
+  transition: transform 0.15s, box-shadow 0.15s;
+  z-index: 50;
+}
+.fab:hover { transform: scale(1.06); box-shadow: 0 6px 24px rgba(26,58,92,0.5); }
+.fab:active { transform: scale(0.96); }
+
+/* ─── MODAL SHEET ─── */
+.modal-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(14,14,16,0.5);
+  z-index: 100;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s;
+}
+.modal-overlay.active { opacity: 1; pointer-events: all; }
+.modal-sheet {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  background: var(--paper);
+  border-radius: 24px 24px 0 0;
+  padding: 20px;
+  transform: translateY(100%);
+  transition: transform 0.3s cubic-bezier(0.32,0.72,0,1);
+  max-height: 90%;
+  overflow-y: auto;
+}
+.modal-sheet.active { transform: translateY(0); }
+.sheet-handle {
+  width: 36px; height: 4px;
+  background: var(--rule);
+  border-radius: 2px;
+  margin: 0 auto 18px;
+}
+.sheet-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 20px;
+  margin-bottom: 18px;
+  color: var(--ink);
+}
+
+/* ─── FORM ELEMENTS ─── */
+.form-label {
+  font-size: 10.5px;
+  font-family: 'IBM Plex Mono', monospace;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--muted);
+  display: block;
+  margin-bottom: 6px;
+  margin-top: 14px;
+}
+textarea, input[type="text"], select {
+  width: 100%;
+  background: var(--white);
+  border: 1px solid var(--rule);
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-size: 13.5px;
+  color: var(--ink);
+  outline: none;
+  transition: border-color 0.15s;
+  resize: none;
+}
+textarea:focus, input[type="text"]:focus, select:focus { border-color: var(--accent); }
+textarea { min-height: 88px; }
+
+.post-type-row {
+  display: flex; gap: 8px; margin: 14px 0;
+}
+.type-pill {
+  flex: 1;
+  padding: 8px 6px;
+  text-align: center;
+  border: 1.5px solid var(--rule);
+  border-radius: 8px;
+  font-size: 11px;
+  font-family: 'IBM Plex Mono', monospace;
+  cursor: pointer;
+  color: var(--muted);
+  background: transparent;
+  transition: all 0.15s;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.type-pill.active {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: var(--blue-bg);
+  font-weight: 500;
+}
+
+.boom-row {
+  display: flex; gap: 8px; margin-top: 14px;
+}
+.boom-pill {
+  flex: 1;
+  padding: 9px 4px;
+  border: 1.5px solid var(--rule);
+  border-radius: 8px;
+  text-align: center;
+  font-size: 11px;
+  font-family: 'IBM Plex Mono', monospace;
+  cursor: pointer;
+  color: var(--muted);
+  background: transparent;
+  transition: all 0.15s;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+.boom-pill.active {
+  border-color: var(--gold);
+  color: var(--gold);
+  background: #fff8e8;
+}
+
+.submit-btn {
+  width: 100%;
+  margin-top: 18px;
+  padding: 13px;
+  background: var(--accent);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 500;
+  font-family: 'IBM Plex Sans', sans-serif;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.submit-btn:hover { background: var(--accent-light); }
+
+/* ─── PROFILE SIDE PANEL ─── */
+#screen-profile .status-bar { background: var(--accent); color: rgba(255,255,255,0.7); }
+.profile-hero {
+  background: var(--accent);
+  padding: 20px 20px 28px;
+  position: relative;
+}
+.profile-hero-top {
+  display: flex; gap: 14px; align-items: flex-start; margin-bottom: 14px;
+}
+.profile-avatar {
+  width: 64px; height: 64px;
+  border-radius: 50%;
+  background: var(--gold);
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Playfair Display', serif;
+  font-size: 26px;
+  color: white;
+  font-weight: 600;
+  flex-shrink: 0;
+  border: 3px solid rgba(255,255,255,0.25);
+}
+.profile-name {
+  font-family: 'Playfair Display', serif;
+  font-size: 19px;
+  color: white;
+  font-weight: 600;
+  line-height: 1.2;
+  margin-bottom: 4px;
+}
+.profile-designation {
+  font-size: 11.5px;
+  color: rgba(255,255,255,0.65);
+  font-family: 'IBM Plex Mono', monospace;
+  margin-bottom: 2px;
+}
+.verified-badge {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-size: 10px;
+  font-family: 'IBM Plex Mono', monospace;
+  color: var(--gold-light);
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+.profile-expertise {
+  display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px;
+}
+.expertise-chip {
+  padding: 3px 10px;
+  background: rgba(255,255,255,0.12);
+  border-radius: 20px;
+  font-size: 10.5px;
+  color: rgba(255,255,255,0.8);
+  font-family: 'IBM Plex Mono', monospace;
+}
+
+.profile-menu-list { padding: 8px 0; }
+.menu-item {
+  display: flex; align-items: center; gap: 14px;
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--rule);
+  cursor: pointer;
+  transition: background 0.12s;
+  color: var(--ink);
+}
+.menu-item:active { background: var(--soft); }
+.menu-icon { font-size: 20px; width: 28px; text-align: center; flex-shrink: 0; }
+.menu-label { font-size: 14px; font-weight: 500; flex: 1; }
+.menu-sub { font-size: 11px; color: var(--muted); font-family: 'IBM Plex Mono', monospace; }
+.menu-chevron { color: var(--muted); font-size: 13px; }
+
+/* sub-screen: dashboard */
+.stat-grid {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 10px; padding: 16px;
+}
+.stat-card {
+  background: var(--white);
+  border: 1px solid var(--rule);
+  border-radius: 12px;
+  padding: 14px 16px;
+}
+.stat-num {
+  font-family: 'Playfair Display', serif;
+  font-size: 28px;
+  color: var(--accent);
+  line-height: 1;
+  margin-bottom: 4px;
+}
+.stat-label {
+  font-size: 10px;
+  font-family: 'IBM Plex Mono', monospace;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: var(--muted);
+}
+
+/* subscription card */
+.sub-card {
+  margin: 0 16px 16px;
+  padding: 16px;
+  background: var(--accent);
+  border-radius: 14px;
+  color: white;
+}
+.sub-plan { font-family: 'IBM Plex Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: rgba(255,255,255,0.55); margin-bottom: 4px; }
+.sub-price { font-family: 'Playfair Display', serif; font-size: 28px; font-weight: 600; color: white; }
+.sub-price small { font-size: 13px; font-family: 'IBM Plex Sans', sans-serif; font-weight: 300; opacity: 0.7; }
+.sub-expiry { font-size: 11px; color: rgba(255,255,255,0.55); font-family: 'IBM Plex Mono', monospace; margin-top: 6px; }
+.sub-toggle-row {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-top: 12px; padding-top: 12px;
+  border-top: 1px solid rgba(255,255,255,0.15);
+  font-size: 12px;
+  color: rgba(255,255,255,0.75);
+}
+.toggle-switch {
+  width: 40px; height: 22px;
+  background: rgba(255,255,255,0.3);
+  border-radius: 11px;
+  position: relative;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.toggle-switch.on { background: var(--gold); }
+.toggle-switch::after {
+  content: '';
+  position: absolute;
+  width: 18px; height: 18px;
+  background: white;
+  border-radius: 50%;
+  top: 2px; left: 2px;
+  transition: left 0.2s;
+}
+.toggle-switch.on::after { left: 20px; }
+
+/* ─── CHAT SCREEN ─── */
+.chat-list { padding: 0; }
+.chat-item {
+  display: flex; gap: 12px; align-items: center;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--rule);
+  cursor: pointer;
+  transition: background 0.12s;
+}
+.chat-item:active { background: var(--soft); }
+.chat-avatar {
+  width: 44px; height: 44px;
+  border-radius: 50%;
+  background: var(--accent);
+  display: flex; align-items: center; justify-content: center;
+  color: white;
+  font-family: 'Playfair Display', serif;
+  font-weight: 600;
+  font-size: 17px;
+  flex-shrink: 0;
+}
+.chat-name { font-size: 14px; font-weight: 600; color: var(--ink); }
+.chat-preview { font-size: 12px; color: var(--muted); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 220px; }
+.chat-meta { margin-left: auto; text-align: right; }
+.chat-time { font-size: 10.5px; color: var(--muted); font-family: 'IBM Plex Mono', monospace; }
+.chat-unread {
+  margin-top: 4px;
+  width: 18px; height: 18px;
+  background: var(--accent);
+  border-radius: 50%;
+  font-size: 10px;
+  color: white;
+  display: flex; align-items: center; justify-content: center;
+  margin-left: auto;
+  font-family: 'IBM Plex Mono', monospace;
+}
+
+/* ─── ACTIVE CHAT ─── */
+.chat-messages {
+  display: flex; flex-direction: column;
+  gap: 10px;
+  padding: 14px 16px;
+}
+.msg-bubble {
+  max-width: 78%;
+  padding: 9px 13px;
+  border-radius: 16px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--ink);
+}
+.msg-in {
+  background: var(--white);
+  border: 1px solid var(--rule);
+  border-bottom-left-radius: 4px;
+  align-self: flex-start;
+}
+.msg-out {
+  background: var(--accent);
+  color: white;
+  border-bottom-right-radius: 4px;
+  align-self: flex-end;
+}
+.msg-time { font-size: 9.5px; color: var(--muted); font-family: 'IBM Plex Mono', monospace; margin-top: 2px; }
+.msg-time.out { text-align: right; color: rgba(255,255,255,0.55); }
+
+.chat-input-row {
+  display: flex; gap: 10px; align-items: flex-end;
+  padding: 10px 16px;
+  background: var(--paper);
+  border-top: 1px solid var(--rule);
+  flex-shrink: 0;
+}
+.chat-input {
+  flex: 1;
+  background: var(--white);
+  border: 1px solid var(--rule);
+  border-radius: 20px;
+  padding: 9px 14px;
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-size: 13.5px;
+  color: var(--ink);
+  outline: none;
+  resize: none;
+  min-height: 38px;
+  max-height: 80px;
+  overflow-y: auto;
+}
+.chat-send {
+  width: 38px; height: 38px;
+  background: var(--accent);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  font-size: 16px;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  transition: background 0.15s;
+}
+.chat-send:hover { background: var(--accent-light); }
+
+/* ─── COMM HUB ─── */
+.hub-tabs {
+  display: flex;
+  border-bottom: 1px solid var(--rule);
+  background: var(--paper);
+  flex-shrink: 0;
+}
+.hub-tab {
+  flex: 1;
+  padding: 13px 0;
+  text-align: center;
+  font-size: 11px;
+  font-family: 'IBM Plex Mono', monospace;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: var(--muted);
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: all 0.15s;
+}
+.hub-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+.call-log-item {
+  display: flex; align-items: center; gap: 12px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--rule);
+}
+.call-icon { font-size: 22px; }
+.call-name { font-size: 13.5px; font-weight: 500; color: var(--ink); }
+.call-detail { font-size: 11px; color: var(--muted); font-family: 'IBM Plex Mono', monospace; margin-top: 2px; }
+.call-duration { margin-left: auto; font-size: 11px; color: var(--muted); font-family: 'IBM Plex Mono', monospace; }
+
+.meeting-item {
+  margin: 12px 16px;
+  padding: 14px;
+  background: var(--white);
+  border: 1px solid var(--rule);
+  border-radius: 12px;
+  border-left: 3px solid var(--accent);
+}
+.meeting-title { font-size: 13.5px; font-weight: 600; color: var(--ink); margin-bottom: 4px; }
+.meeting-meta { font-size: 11px; color: var(--muted); font-family: 'IBM Plex Mono', monospace; }
+.meeting-attendees { margin-top: 8px; display: flex; gap: 6px; }
+.att-chip {
+  font-size: 10px;
+  padding: 2px 8px;
+  background: var(--blue-bg);
+  color: var(--accent);
+  border-radius: 10px;
+  font-family: 'IBM Plex Mono', monospace;
+}
+
+/* ─── SECTION LABEL ─── */
+.section-label {
+  padding: 12px 16px 6px;
+  font-size: 9.5px;
+  font-family: 'IBM Plex Mono', monospace;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: var(--muted);
+  background: var(--paper);
+}
+
+/* ─── EMPTY STATE ─── */
+.empty-state {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  padding: 48px 32px;
+  color: var(--muted);
+  text-align: center;
+  gap: 10px;
+}
+.empty-state .big-icon { font-size: 40px; }
+.empty-state p { font-size: 13px; line-height: 1.6; }
+
+/* ─── SETTINGS ─── */
+.settings-group {
+  background: var(--white);
+  margin: 12px 16px;
+  border-radius: 12px;
+  border: 1px solid var(--rule);
+  overflow: hidden;
+}
+.setting-row {
+  display: flex; align-items: center;
+  padding: 13px 16px;
+  border-bottom: 1px solid var(--rule);
+  gap: 12px;
+}
+.setting-row:last-child { border-bottom: none; }
+.setting-label { font-size: 13.5px; color: var(--ink); flex: 1; }
+.setting-sub { font-size: 11px; color: var(--muted); font-family: 'IBM Plex Mono', monospace; margin-top: 2px; }
+.setting-toggle {
+  width: 44px; height: 24px;
+  background: var(--rule);
+  border-radius: 12px;
+  position: relative;
+  cursor: pointer;
+  transition: background 0.2s;
+  flex-shrink: 0;
+  border: none;
+}
+.setting-toggle.on { background: var(--accent); }
+.setting-toggle::after {
+  content: '';
+  position: absolute;
+  width: 20px; height: 20px;
+  background: white;
+  border-radius: 50%;
+  top: 2px; left: 2px;
+  transition: left 0.2s;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+.setting-toggle.on::after { left: 22px; }
+
+/* ─── TOASTS ─── */
+.toast {
+  position: absolute;
+  bottom: calc(var(--nav-h) + 12px);
+  left: 16px; right: 16px;
+  background: var(--ink);
+  color: white;
+  padding: 12px 16px;
+  border-radius: 10px;
+  font-size: 12.5px;
+  font-family: 'IBM Plex Mono', monospace;
+  z-index: 200;
+  transform: translateY(20px);
+  opacity: 0;
+  transition: all 0.25s;
+  pointer-events: none;
+}
+.toast.show {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+/* ─── LOGIN SCREEN ─── */
+#screen-login {
+  background: var(--accent);
+}
+#screen-login .status-bar {
+  background: var(--accent);
+  color: rgba(255,255,255,0.5);
+}
+.login-body {
+  flex: 1;
+  display: flex; flex-direction: column;
+  padding: 40px 28px 32px;
+}
+.login-logo {
+  font-family: 'Playfair Display', serif;
+  font-size: 48px;
+  font-weight: 600;
+  color: white;
+  letter-spacing: -1px;
+  margin-bottom: 4px;
+}
+.login-logo em { font-style: italic; color: rgba(255,255,255,0.4); }
+.login-tagline {
+  font-size: 13px;
+  color: rgba(255,255,255,0.5);
+  font-family: 'IBM Plex Mono', monospace;
+  letter-spacing: 0.5px;
+  margin-bottom: 48px;
+}
+.login-form { flex: 1; display: flex; flex-direction: column; gap: 14px; }
+.login-input-wrap { display: flex; flex-direction: column; gap: 6px; }
+.login-label {
+  font-size: 9.5px;
+  font-family: 'IBM Plex Mono', monospace;
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  color: rgba(255,255,255,0.5);
+}
+.login-input {
+  background: rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 10px;
+  padding: 12px 14px;
+  color: white;
+  font-size: 14px;
+  font-family: 'IBM Plex Sans', sans-serif;
+  outline: none;
+  transition: border-color 0.15s;
+  width: 100%;
+}
+.login-input::placeholder { color: rgba(255,255,255,0.3); }
+.login-input:focus { border-color: rgba(255,255,255,0.5); }
+.login-btn {
+  background: white;
+  color: var(--accent);
+  border: none;
+  border-radius: 12px;
+  padding: 14px;
+  font-size: 14.5px;
+  font-weight: 600;
+  font-family: 'IBM Plex Sans', sans-serif;
+  cursor: pointer;
+  transition: opacity 0.15s;
+  margin-top: 8px;
+}
+.login-btn:hover { opacity: 0.92; }
+.login-divider {
+  text-align: center;
+  font-size: 11px;
+  color: rgba(255,255,255,0.3);
+  font-family: 'IBM Plex Mono', monospace;
+  margin: 4px 0;
+}
+.login-otp-btn {
+  background: transparent;
+  border: 1px solid rgba(255,255,255,0.25);
+  color: rgba(255,255,255,0.7);
+  border-radius: 12px;
+  padding: 13px;
+  font-size: 13.5px;
+  font-family: 'IBM Plex Sans', sans-serif;
+  cursor: pointer;
+  transition: border-color 0.15s;
+}
+.login-otp-btn:hover { border-color: rgba(255,255,255,0.5); }
+.login-footer {
+  text-align: center;
+  font-size: 10px;
+  color: rgba(255,255,255,0.25);
+  font-family: 'IBM Plex Mono', monospace;
+  margin-top: 20px;
+  line-height: 1.6;
+}
+
+/* ─── KYC SCREEN ─── */
+.kyc-step {
+  padding: 20px 16px;
+}
+.kyc-step-num {
+  font-size: 9px;
+  font-family: 'IBM Plex Mono', monospace;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: var(--gold);
+  margin-bottom: 4px;
+}
+.kyc-step-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 22px;
+  color: var(--ink);
+  margin-bottom: 8px;
+}
+.kyc-step-desc {
+  font-size: 12.5px;
+  color: var(--muted);
+  line-height: 1.6;
+  margin-bottom: 20px;
+}
+.profession-grid {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 8px; margin-bottom: 16px;
+}
+.prof-btn {
+  padding: 12px 10px;
+  border: 1.5px solid var(--rule);
+  border-radius: 10px;
+  font-size: 12px;
+  font-family: 'IBM Plex Sans', sans-serif;
+  text-align: center;
+  cursor: pointer;
+  background: var(--white);
+  color: var(--ink);
+  transition: all 0.15s;
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+}
+.prof-btn .p-icon { font-size: 22px; }
+.prof-btn:hover, .prof-btn.active { border-color: var(--accent); background: var(--blue-bg); color: var(--accent); }
+.upload-zone {
+  border: 2px dashed var(--rule);
+  border-radius: 12px;
+  padding: 28px 16px;
+  text-align: center;
+  color: var(--muted);
+  font-size: 12.5px;
+  cursor: pointer;
+  transition: border-color 0.15s;
+  margin-bottom: 14px;
+}
+.upload-zone:hover { border-color: var(--accent); }
+.upload-icon { font-size: 32px; margin-bottom: 8px; }
+.upload-text { font-size: 11.5px; font-family: 'IBM Plex Mono', monospace; margin-top: 4px; color: var(--muted); }
+
+/* progress bar */
+.kyc-progress {
+  display: flex; gap: 4px; padding: 0 16px 16px;
+}
+.progress-dot {
+  height: 3px; flex: 1;
+  background: var(--rule);
+  border-radius: 2px;
+  transition: background 0.2s;
+}
+.progress-dot.done { background: var(--accent); }
+.progress-dot.active { background: var(--gold); }
+
+/* ─── BACK BUTTON ─── */
+.back-btn {
+  font-size: 16px;
+  color: var(--muted);
+  background: none; border: none;
+  cursor: pointer;
+  padding: 4px;
+  display: flex; align-items: center;
+}
+.back-btn:hover { color: var(--accent); }
+
+/* scroll shimmer for fade */
+.scroll-fade { position: relative; }
+.scroll-fade::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 32px;
+  background: linear-gradient(transparent, var(--paper));
+  pointer-events: none;
+}
+
+/* ─── ANIMATIONS ─── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.post-card { animation: fadeUp 0.3s ease both; }
+.post-card:nth-child(1) { animation-delay: 0.03s; }
+.post-card:nth-child(2) { animation-delay: 0.08s; }
+.post-card:nth-child(3) { animation-delay: 0.13s; }
+.post-card:nth-child(4) { animation-delay: 0.18s; }
+.post-card:nth-child(5) { animation-delay: 0.23s; }
+
+/* ─── RIPPLE VISUAL ─── */
+.ripple-chain {
+  display: flex; align-items: center; gap: 4px;
+  padding: 8px 12px;
+  background: #e0f2f1;
+  border-radius: 8px;
+  margin-bottom: 8px;
+  font-size: 11px;
+  font-family: 'IBM Plex Mono', monospace;
+  color: #00695c;
+  flex-wrap: wrap;
+}
+.ripple-node {
+  display: flex; align-items: center; gap: 4px;
+}
+.rn-name { font-weight: 500; }
+.rn-arrow { color: #80cbc4; }
+.rn-viewed { color: #00695c; font-size: 10px; }
+.rn-pending { color: #80cbc4; font-size: 10px; }
+
+/* web desktop hint */
+.desktop-hint {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(14,14,16,0.75);
+  color: rgba(255,255,255,0.7);
+  font-size: 10.5px;
+  font-family: 'IBM Plex Mono', monospace;
+  padding: 8px 18px;
+  border-radius: 20px;
+  letter-spacing: 0.5px;
+  pointer-events: none;
+  backdrop-filter: blur(8px);
+}
+</style>
+</head>
+<body>
+
+<div class="desktop-hint">← click nav to explore · prototype v1</div>
+
+<div class="device">
+
+  <!-- ════════════════════════════════
+       SCREEN: LOGIN
+  ════════════════════════════════ -->
+  <div class="screen active" id="screen-login">
+    <div class="status-bar dark">
+      <span>9:41</span>
+      <div class="status-icons">📶 🔋</div>
+    </div>
+    <div class="login-body">
+      <div class="login-logo">Frat<em>ernity</em></div>
+      <div class="login-tagline">PROFESSIONAL COMMONS · VERIFIED ACCESS</div>
+      <div class="login-form">
+        <div class="login-input-wrap">
+          <span class="login-label">Email or Phone</span>
+          <input type="text" class="login-input" placeholder="you@example.com" id="login-email">
+        </div>
+        <div class="login-input-wrap">
+          <span class="login-label">Password</span>
+          <input type="text" class="login-input" placeholder="••••••••" id="login-pw">
+        </div>
+        <button class="login-btn" onclick="gotoScreen('screen-feed')">Sign In</button>
+        <div class="login-divider">— or —</div>
+        <button class="login-otp-btn" onclick="gotoScreen('screen-kyc')">New Member · Begin Verification</button>
+      </div>
+      <div class="login-footer">Fraternity Technologies Pvt. Ltd.<br>KYC-verified professionals only · ₹9/month</div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════
+       SCREEN: KYC
+  ════════════════════════════════ -->
+  <div class="screen" id="screen-kyc">
+    <div class="status-bar">
+      <span>9:41</span>
+      <div class="status-icons">📶 🔋</div>
+    </div>
+    <div class="header">
+      <button class="back-btn" onclick="gotoScreen('screen-login')">←</button>
+      <span class="header-logo">Verification</span>
+    </div>
+    <div class="kyc-progress">
+      <div class="progress-dot done"></div>
+      <div class="progress-dot active"></div>
+      <div class="progress-dot"></div>
+      <div class="progress-dot"></div>
+      <div class="progress-dot"></div>
+    </div>
+    <div class="scroll-body">
+      <div class="kyc-step">
+        <div class="kyc-step-num">Step 2 of 5</div>
+        <div class="kyc-step-title">Select Your Profession</div>
+        <div class="kyc-step-desc">Fraternity is exclusively for professionals certified by statutory institutes. Select your certification type below.</div>
+        <div class="profession-grid">
+          <button class="prof-btn active" onclick="selectProf(this)"><span class="p-icon">📊</span>Chartered Accountant</button>
+          <button class="prof-btn" onclick="selectProf(this)"><span class="p-icon">⚖️</span>Lawyer</button>
+          <button class="prof-btn" onclick="selectProf(this)"><span class="p-icon">🩺</span>Doctor</button>
+          <button class="prof-btn" onclick="selectProf(this)"><span class="p-icon">⚙️</span>Engineer</button>
+          <button class="prof-btn" onclick="selectProf(this)"><span class="p-icon">🏛️</span>Architect</button>
+          <button class="prof-btn" onclick="selectProf(this)"><span class="p-icon">📋</span>Company Secretary</button>
+          <button class="prof-btn" onclick="selectProf(this)"><span class="p-icon">💼</span>Cost Accountant</button>
+          <button class="prof-btn" onclick="selectProf(this)"><span class="p-icon">➕</span>Other Statutory</button>
+        </div>
+        <div class="form-label" style="margin-top:0">Specialisation / Domain</div>
+        <input type="text" placeholder="e.g. Indirect Taxation, GST, Transfer Pricing">
+        <div class="form-label">Upload Professional Certificate</div>
+        <div class="upload-zone" onclick="showToast('📎 File picker — not available in prototype')">
+          <div class="upload-icon">📄</div>
+          <div>Tap to upload</div>
+          <div class="upload-text">ICAI cert, degree, or registration document</div>
+        </div>
+        <div class="form-label">Upload Government ID</div>
+        <div class="upload-zone" onclick="showToast('📎 File picker — not available in prototype')">
+          <div class="upload-icon">🪪</div>
+          <div>Tap to upload</div>
+          <div class="upload-text">Aadhaar · PAN · Passport</div>
+        </div>
+        <button class="submit-btn" onclick="gotoScreen('screen-feed')">Submit for Verification →</button>
+        <p style="font-size:11px;color:var(--muted);text-align:center;margin-top:12px;font-family:'IBM Plex Mono',monospace;">Review within 24 hrs · Documents encrypted · Never shown to peers</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════
+       SCREEN: FEED
+  ════════════════════════════════ -->
+  <div class="screen" id="screen-feed">
+    <div class="status-bar">
+      <span>9:41</span>
+      <div class="status-icons">📶 🔋</div>
+    </div>
+    <div class="header">
+      <button class="header-btn" onclick="gotoScreen('screen-profile')" title="Profile menu (swipe left)">☰</button>
+      <span class="header-logo">Frat<em>ernity</em></span>
+      <button class="header-btn notif-badge" onclick="showToast('💬 No new replies or mentions')">🔔</button>
+      <button class="header-btn" onclick="gotoScreen('screen-chat')" title="Chat (swipe right)">💬</button>
+    </div>
+
+    <!-- feed toggle -->
+    <div class="feed-toggle-wrap" id="feed-toggle-wrap">
+      <div class="feed-toggle">
+        <button class="toggle-btn active" id="toggle-same" onclick="setFeedToggle('same')">Same Domain</button>
+        <button class="toggle-btn" id="toggle-inter" onclick="setFeedToggle('inter')">Inter Domain</button>
+      </div>
+    </div>
+
+    <div class="scroll-body" id="feed-scroll" onscroll="handleFeedScroll()">
+
+      <!-- POST 1 — Standard + Instant Boom -->
+      <div class="post-card">
+        <div class="boom-tag">⚡ Instant Boom · Chartered Accountants</div>
+        <div class="post-header">
+          <div class="avatar">RV</div>
+          <div>
+            <div class="post-author-name">Radhika Verma</div>
+            <div class="post-author-tag">CA · Taxation &amp; Transfer Pricing</div>
+          </div>
+          <span class="post-time">2 min</span>
+        </div>
+        <p class="post-text">The CBDT circular on Section 56(2)(x) clarifications is significant for intra-group restructurings. If FMV is benchmarked using DCF and the ±15% tolerance band is applied, several transactions previously treated as taxable will now fall outside scope. Worth revisiting valuations done in FY23–24.</p>
+        <div class="reactions">
+          <button class="reaction-btn" onclick="toggleReaction(this)"><span class="emoji">💡</span> Insightful <span style="color:var(--muted);font-size:10px">18</span></button>
+          <button class="reaction-btn active" onclick="toggleReaction(this)"><span class="emoji">✅</span> Agree <span style="color:var(--muted);font-size:10px">12</span></button>
+          <button class="reaction-btn" onclick="toggleReaction(this)"><span class="emoji">🔖</span> Useful <span style="color:var(--muted);font-size:10px">9</span></button>
+          <button class="comment-btn" onclick="showToast('💬 3 comments')">💬 3</button>
+        </div>
+      </div>
+
+      <!-- POST 2 — Quiz -->
+      <div class="post-card">
+        <div class="post-header">
+          <div class="avatar gold">AM</div>
+          <div>
+            <div class="post-author-name">Arjun Mehta</div>
+            <div class="post-author-tag">CA · Audit &amp; Assurance</div>
+          </div>
+          <span class="post-time">18 min</span>
+        </div>
+        <span class="post-type-badge badge-quiz">📝 Quiz · Single Correct</span>
+        <p class="post-text">Under SA 701, Key Audit Matters must be communicated in the auditor's report for:</p>
+        <div class="quiz-options" id="quiz1">
+          <button class="quiz-opt" onclick="selectQuizOpt('quiz1', this, 0)"><span class="opt-key">A</span>All audit engagements</button>
+          <button class="quiz-opt" onclick="selectQuizOpt('quiz1', this, 1)"><span class="opt-key">B</span>Listed entities only</button>
+          <button class="quiz-opt" onclick="selectQuizOpt('quiz1', this, 2)"><span class="opt-key">C</span>Entities with revenue &gt; ₹500 cr</button>
+          <button class="quiz-opt" onclick="selectQuizOpt('quiz1', this, 3)"><span class="opt-key">D</span>Public interest entities &amp; listed</button>
+        </div>
+        <button class="quiz-submit" id="quiz1-submit" onclick="submitQuiz('quiz1', 1)">Submit Answer</button>
+        <div class="quiz-result" id="quiz1-result">✓ Correct — Listed entities only. SA 701 applies to audits of listed entities and other circumstances where required by law.</div>
+      </div>
+
+      <!-- POST 3 — Ripple Boom -->
+      <div class="post-card">
+        <div class="boom-tag">🌊 Ripple Boom · 5 peers · 24hr window</div>
+        <div class="ripple-chain">
+          <div class="ripple-node"><span class="rn-name">You</span><span class="rn-viewed">✓</span><span class="rn-arrow">→</span></div>
+          <div class="ripple-node"><span class="rn-name">Priya S.</span><span class="rn-viewed">✓</span><span class="rn-arrow">→</span></div>
+          <div class="ripple-node"><span class="rn-name">Kiran M.</span><span class="rn-pending">⏳</span><span class="rn-arrow">→</span></div>
+          <div class="ripple-node" style="color:#b0c0cc"><span class="rn-name">Dev R.</span><span class="rn-arrow">→</span></div>
+          <div class="ripple-node" style="color:#b0c0cc"><span class="rn-name">Anita K.</span></div>
+        </div>
+        <div class="post-header">
+          <div class="avatar green">SK</div>
+          <div>
+            <div class="post-author-name">Siddharth Kaur</div>
+            <div class="post-author-tag">CA · Insolvency &amp; Restructuring</div>
+          </div>
+          <span class="post-time">1 hr</span>
+        </div>
+        <p class="post-text">Detailed case analysis: Re: M/s Techno Infra Ltd — NCLT Bench ruling on CoC's commercial wisdom vs. liquidation value. The tribunal refused to interfere despite haircut exceeding 90%. Key takeaway for IPs handling stressed assets in infrastructure sector.</p>
+        <div class="reactions">
+          <button class="reaction-btn" onclick="toggleReaction(this)"><span class="emoji">💡</span> Insightful <span style="color:var(--muted);font-size:10px">7</span></button>
+          <button class="reaction-btn" onclick="toggleReaction(this)"><span class="emoji">🔖</span> Useful <span style="color:var(--muted);font-size:10px">4</span></button>
+          <button class="comment-btn" onclick="showToast('💬 1 comment')">💬 1</button>
+        </div>
+      </div>
+
+      <!-- POST 4 — Hidden Response -->
+      <div class="post-card">
+        <div class="post-header">
+          <div class="avatar" style="background:#5c1a4a;">NP</div>
+          <div>
+            <div class="post-author-name">Neha Prasad</div>
+            <div class="post-author-tag">CA · Corporate Finance</div>
+          </div>
+          <span class="post-time">3 hr</span>
+        </div>
+        <span class="post-type-badge badge-hidden">🔒 Hidden Response</span>
+        <p class="post-text">In your experience — what is the single most overlooked due diligence risk in PE buyouts of family-owned businesses in India? Your response is visible only to me. All peers respond independently.</p>
+        <div style="display:flex;gap:8px;margin-top:8px;">
+          <textarea placeholder="Your independent answer..." style="font-size:12.5px;min-height:64px;" onclick="event.stopPropagation()"></textarea>
+        </div>
+        <button class="quiz-submit" style="margin-top:8px" onclick="showToast('✓ Response submitted. Visible only to Neha.')">Submit Response</button>
+      </div>
+
+      <!-- POST 5 — Standard -->
+      <div class="post-card">
+        <div class="post-header">
+          <div class="avatar" style="background:#1a4a3a;">PT</div>
+          <div>
+            <div class="post-author-name">Prakash Thakur</div>
+            <div class="post-author-tag">CA · International Taxation</div>
+          </div>
+          <span class="post-time">5 hr</span>
+        </div>
+        <p class="post-text">Pillar Two GloBE rules effective from April 2025 in India — the Income Inclusion Rule will apply to MNE groups with consolidated revenue ≥ €750M. QDMTT mechanism creates significant compliance complexity for group treasury functions. Anyone working on this for a client currently?</p>
+        <div class="reactions">
+          <button class="reaction-btn" onclick="toggleReaction(this)"><span class="emoji">💡</span> Insightful <span style="color:var(--muted);font-size:10px">23</span></button>
+          <button class="reaction-btn" onclick="toggleReaction(this)"><span class="emoji">🤔</span> Disagree <span style="color:var(--muted);font-size:10px">2</span></button>
+          <button class="reaction-btn" onclick="toggleReaction(this)"><span class="emoji">🔖</span> Useful <span style="color:var(--muted);font-size:10px">15</span></button>
+          <button class="comment-btn" onclick="showToast('💬 6 comments')">💬 6</button>
+        </div>
+      </div>
+
+      <div style="height:16px"></div>
+    </div><!-- end scroll-body -->
+
+    <!-- FAB -->
+    <button class="fab" onclick="openCompose()">✏</button>
+
+    <!-- BOTTOM NAV -->
+    <div class="bottom-nav">
+      <button class="nav-item active" onclick="setNav(this,'screen-feed')">
+        <span class="icon">🏠</span>Feed
+      </button>
+      <button class="nav-item" onclick="gotoScreen('screen-search')">
+        <span class="icon">🔍</span>Search
+      </button>
+      <button class="nav-item" onclick="gotoScreen('screen-chat')">
+        <span class="icon">💬</span>Chat
+      </button>
+      <button class="nav-item" onclick="gotoScreen('screen-profile')">
+        <span class="icon">👤</span>Profile
+      </button>
+    </div>
+
+    <!-- COMPOSE SHEET -->
+    <div class="modal-overlay" id="compose-overlay" onclick="closeCompose()">
+      <div class="modal-sheet" id="compose-sheet" onclick="event.stopPropagation()">
+        <div class="sheet-handle"></div>
+        <div class="sheet-title">New Post</div>
+        <div class="form-label" style="margin-top:0">Post Type</div>
+        <div class="post-type-row">
+          <button class="type-pill active" onclick="setPostType(this)">Standard</button>
+          <button class="type-pill" onclick="setPostType(this)">Quiz</button>
+          <button class="type-pill" onclick="setPostType(this)">Hidden</button>
+        </div>
+        <div class="form-label">Content</div>
+        <textarea placeholder="Share an insight, update, or question with your domain peers…" rows="4"></textarea>
+        <div class="form-label">Distribution</div>
+        <div class="boom-row">
+          <button class="boom-pill active" onclick="setBoom(this)">No Boom</button>
+          <button class="boom-pill" onclick="setBoom(this)">⚡ Instant</button>
+          <button class="boom-pill" onclick="setBoom(this)">🌊 Ripple</button>
+        </div>
+        <div id="ripple-config" style="display:none;margin-top:12px;">
+          <div class="form-label">Timeout per Peer</div>
+          <select>
+            <option>6 hours</option>
+            <option selected>24 hours</option>
+            <option>48 hours</option>
+            <option>72 hours</option>
+          </select>
+          <div class="form-label">Target Peers (tap to add)</div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:4px;">
+            <div style="padding:4px 12px;background:var(--blue-bg);border-radius:20px;font-size:11.5px;color:var(--accent)">Priya S. ×</div>
+            <div style="padding:4px 12px;background:var(--blue-bg);border-radius:20px;font-size:11.5px;color:var(--accent)">Kiran M. ×</div>
+            <div style="padding:4px 12px;border:1px dashed var(--rule);border-radius:20px;font-size:11.5px;color:var(--muted);cursor:pointer" onclick="showToast('→ Peer selector')">+ Add peer</div>
+          </div>
+        </div>
+        <button class="submit-btn" onclick="submitPost()">Post</button>
+      </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+  </div><!-- end feed screen -->
+
+  <!-- ════════════════════════════════
+       SCREEN: PROFILE MENU
+  ════════════════════════════════ -->
+  <div class="screen" id="screen-profile">
+    <div class="status-bar dark">
+      <span>9:41</span>
+      <div class="status-icons">📶 🔋</div>
+    </div>
+    <div class="scroll-body">
+      <div class="profile-hero">
+        <div class="profile-hero-top">
+          <div class="profile-avatar">A</div>
+          <div>
+            <div class="profile-name">Aryan Sharma</div>
+            <div class="profile-designation">Chartered Accountant · ICAI</div>
+            <div class="profile-designation">Indirect Taxation · GST Advisory</div>
+            <div class="verified-badge" style="margin-top:6px">✓ KYC Verified</div>
+          </div>
+        </div>
+        <div class="profile-expertise">
+          <span class="expertise-chip">GST</span>
+          <span class="expertise-chip">Transfer Pricing</span>
+          <span class="expertise-chip">Customs</span>
+          <span class="expertise-chip">FEMA</span>
+        </div>
+      </div>
+
+      <div class="profile-menu-list">
+        <div class="menu-item" onclick="gotoScreen('screen-dashboard')">
+          <span class="menu-icon">📊</span>
+          <div><div class="menu-label">Dashboard</div><div class="menu-sub">Activity &amp; overview</div></div>
+          <span class="menu-chevron">›</span>
+        </div>
+        <div class="menu-item" onclick="gotoScreen('screen-analytics')">
+          <span class="menu-icon">📈</span>
+          <div><div class="menu-label">Analytics</div><div class="menu-sub">Post performance · Private</div></div>
+          <span class="menu-chevron">›</span>
+        </div>
+        <div class="menu-item" onclick="gotoScreen('screen-settings')">
+          <span class="menu-icon">⚙️</span>
+          <div><div class="menu-label">Settings</div><div class="menu-sub">Account · Subscription · Notifications</div></div>
+          <span class="menu-chevron">›</span>
+        </div>
+        <div class="menu-item" onclick="showToast('✏️ Edit profile — opens profile editor')">
+          <span class="menu-icon">✏️</span>
+          <div><div class="menu-label">Edit Profile</div><div class="menu-sub">Update expertise, background, photo</div></div>
+          <span class="menu-chevron">›</span>
+        </div>
+        <div class="menu-item" onclick="gotoScreen('screen-feed')">
+          <span class="menu-icon">🏠</span>
+          <div><div class="menu-label">Home Feed</div></div>
+          <span class="menu-chevron">›</span>
+        </div>
+        <div class="menu-item" onclick="gotoScreen('screen-login')">
+          <span class="menu-icon">🚪</span>
+          <div><div class="menu-label">Sign Out</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════
+       SCREEN: DASHBOARD
+  ════════════════════════════════ -->
+  <div class="screen" id="screen-dashboard">
+    <div class="status-bar">
+      <span>9:41</span>
+      <div class="status-icons">📶 🔋</div>
+    </div>
+    <div class="header">
+      <button class="back-btn" onclick="gotoScreen('screen-profile')">←</button>
+      <span class="header-logo">Dashboard</span>
+    </div>
+    <div class="scroll-body">
+      <div class="stat-grid">
+        <div class="stat-card"><div class="stat-num">12</div><div class="stat-label">Posts This Month</div></div>
+        <div class="stat-card"><div class="stat-num">247</div><div class="stat-label">Peer Views</div></div>
+        <div class="stat-card"><div class="stat-num">38</div><div class="stat-label">Reactions Received</div></div>
+        <div class="stat-card"><div class="stat-num">5</div><div class="stat-label">Quiz Posts</div></div>
+        <div class="stat-card"><div class="stat-num">3</div><div class="stat-label">Meetings Held</div></div>
+        <div class="stat-card"><div class="stat-num">9</div><div class="stat-label">DM Conversations</div></div>
+      </div>
+      <div class="section-label">Recent Activity</div>
+      <div class="post-card" style="animation:none">
+        <div class="post-header">
+          <div class="avatar">A</div>
+          <div><div class="post-author-name">You posted</div><div class="post-author-tag">CBDT Circular on Sec. 56 clarifications</div></div>
+          <span class="post-time">2d ago</span>
+        </div>
+        <p class="post-text" style="font-size:12px;color:var(--muted)">92 views · 14 reactions · Instant Boom</p>
+      </div>
+      <div class="post-card" style="animation:none">
+        <div class="post-header">
+          <div class="avatar">A</div>
+          <div><div class="post-author-name">You posted a Quiz</div><div class="post-author-tag">Section 44AD applicability question</div></div>
+          <span class="post-time">5d ago</span>
+        </div>
+        <p class="post-text" style="font-size:12px;color:var(--muted)">64 responses · 91% correct rate</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════
+       SCREEN: ANALYTICS
+  ════════════════════════════════ -->
+  <div class="screen" id="screen-analytics">
+    <div class="status-bar">
+      <span>9:41</span>
+      <div class="status-icons">📶 🔋</div>
+    </div>
+    <div class="header">
+      <button class="back-btn" onclick="gotoScreen('screen-profile')">←</button>
+      <span class="header-logo">Analytics</span>
+    </div>
+    <div class="scroll-body">
+      <div style="padding:16px">
+        <div style="background:var(--white);border:1px solid var(--rule);border-radius:12px;padding:16px;margin-bottom:12px;">
+          <div style="font-size:10px;font-family:'IBM Plex Mono',monospace;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:8px">Post Views — Last 30 Days</div>
+          <!-- simple bar chart -->
+          <div style="display:flex;align-items:flex-end;gap:4px;height:64px;padding:4px 0">
+            <div style="flex:1;background:var(--accent);opacity:0.3;height:30%"></div>
+            <div style="flex:1;background:var(--accent);opacity:0.5;height:50%"></div>
+            <div style="flex:1;background:var(--accent);opacity:0.4;height:40%"></div>
+            <div style="flex:1;background:var(--accent);opacity:0.7;height:70%"></div>
+            <div style="flex:1;background:var(--accent);opacity:0.6;height:60%"></div>
+            <div style="flex:1;background:var(--accent);opacity:0.9;height:90%"></div>
+            <div style="flex:1;background:var(--accent);height:100%"></div>
+          </div>
+          <div style="font-size:10px;color:var(--muted);font-family:'IBM Plex Mono',monospace;margin-top:6px">247 total · private to you</div>
+        </div>
+        <div style="background:var(--white);border:1px solid var(--rule);border-radius:12px;padding:16px;margin-bottom:12px;">
+          <div style="font-size:10px;font-family:'IBM Plex Mono',monospace;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:10px">Top Reactions</div>
+          <div style="display:flex;flex-direction:column;gap:8px;">
+            <div style="display:flex;align-items:center;gap:8px;font-size:12.5px"><span>💡 Insightful</span><div style="flex:1;height:6px;background:var(--soft);border-radius:3px;overflow:hidden"><div style="width:72%;height:100%;background:var(--accent)"></div></div><span style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--muted)">18</span></div>
+            <div style="display:flex;align-items:center;gap:8px;font-size:12.5px"><span>🔖 Useful</span><div style="flex:1;height:6px;background:var(--soft);border-radius:3px;overflow:hidden"><div style="width:52%;height:100%;background:var(--gold)"></div></div><span style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--muted)">13</span></div>
+            <div style="display:flex;align-items:center;gap:8px;font-size:12.5px"><span>✅ Agree</span><div style="flex:1;height:6px;background:var(--soft);border-radius:3px;overflow:hidden"><div style="width:28%;height:100%;background:var(--green)"></div></div><span style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--muted)">7</span></div>
+          </div>
+        </div>
+        <div style="padding:12px;background:var(--blue-bg);border-radius:10px;font-size:11px;color:var(--muted);font-family:'IBM Plex Mono',monospace;line-height:1.6">Analytics are private — only visible to you. No public follower counts, no influence scores. This data exists to help you, not rank you.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════
+       SCREEN: SETTINGS
+  ════════════════════════════════ -->
+  <div class="screen" id="screen-settings">
+    <div class="status-bar">
+      <span>9:41</span>
+      <div class="status-icons">📶 🔋</div>
+    </div>
+    <div class="header">
+      <button class="back-btn" onclick="gotoScreen('screen-profile')">←</button>
+      <span class="header-logo">Settings</span>
+    </div>
+    <div class="scroll-body">
+      <!-- subscription -->
+      <div class="section-label">Subscription</div>
+      <div class="sub-card">
+        <div class="sub-plan">Annual Plan</div>
+        <div class="sub-price">₹99 <small>/ year</small></div>
+        <div class="sub-expiry">Renews 14 February 2027</div>
+        <div class="sub-toggle-row">
+          <span>Auto-Pay</span>
+          <div class="toggle-switch" id="auto-pay-toggle" onclick="toggleSwitch(this)"></div>
+        </div>
+      </div>
+
+      <!-- notifications -->
+      <div class="section-label">Notifications</div>
+      <div class="settings-group">
+        <div class="setting-row">
+          <div><div class="setting-label">Replies &amp; Mentions</div><div class="setting-sub">Notify when someone replies to your post</div></div>
+          <button class="setting-toggle on" onclick="toggleSwitch(this)"></button>
+        </div>
+        <div class="setting-row">
+          <div><div class="setting-label">Incoming Calls</div></div>
+          <button class="setting-toggle on" onclick="toggleSwitch(this)"></button>
+        </div>
+        <div class="setting-row">
+          <div><div class="setting-label">Meeting Reminders</div></div>
+          <button class="setting-toggle on" onclick="toggleSwitch(this)"></button>
+        </div>
+        <div class="setting-row">
+          <div><div class="setting-label">Email Notifications</div><div class="setting-sub">Optional — off by default</div></div>
+          <button class="setting-toggle" onclick="toggleSwitch(this)"></button>
+        </div>
+        <div class="setting-row">
+          <div><div class="setting-label">Reactions &amp; Views</div><div class="setting-sub">Not notified (intentional design)</div></div>
+          <button class="setting-toggle" style="opacity:0.4" disabled></button>
+        </div>
+      </div>
+
+      <!-- account -->
+      <div class="section-label">Account</div>
+      <div class="settings-group">
+        <div class="setting-row" onclick="showToast('→ Change password flow')">
+          <div><div class="setting-label">Change Password</div></div>
+          <span style="color:var(--muted)">›</span>
+        </div>
+        <div class="setting-row" onclick="showToast('→ KYC document review')">
+          <div><div class="setting-label">KYC Documents</div><div class="setting-sub">Verified · ICAI cert on file</div></div>
+          <span style="color:var(--muted)">›</span>
+        </div>
+        <div class="setting-row" onclick="showToast('⚠️ Account deletion confirmation required')">
+          <div><div class="setting-label" style="color:var(--red)">Delete Account</div></div>
+          <span style="color:var(--muted)">›</span>
+        </div>
+      </div>
+      <div style="height:20px"></div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════
+       SCREEN: CHAT LIST
+  ════════════════════════════════ -->
+  <div class="screen" id="screen-chat">
+    <div class="status-bar">
+      <span>9:41</span>
+      <div class="status-icons">📶 🔋</div>
+    </div>
+    <div class="header">
+      <button class="back-btn" onclick="gotoScreen('screen-feed')">←</button>
+      <span class="header-logo">Messages</span>
+      <button class="header-btn" onclick="gotoScreen('screen-comms-hub')" title="Communication Hub (swipe left)">☰</button>
+    </div>
+    <div class="scroll-body">
+      <div class="section-label">Direct Messages</div>
+      <div class="chat-item" onclick="gotoScreen('screen-active-chat')">
+        <div class="chat-avatar">RV</div>
+        <div style="flex:1;min-width:0">
+          <div class="chat-name">Radhika Verma</div>
+          <div class="chat-preview">Re the 56(2)(x) post — have you seen the AAR ruling from last month?</div>
+        </div>
+        <div class="chat-meta">
+          <div class="chat-time">9:31</div>
+          <div class="chat-unread">2</div>
+        </div>
+      </div>
+      <div class="chat-item" onclick="showToast('→ Chat with Arjun Mehta')">
+        <div class="chat-avatar" style="background:var(--gold)">AM</div>
+        <div style="flex:1;min-width:0">
+          <div class="chat-name">Arjun Mehta</div>
+          <div class="chat-preview">Good discussion on SA 701. Are you working on any listed audits currently?</div>
+        </div>
+        <div class="chat-meta">
+          <div class="chat-time">Yesterday</div>
+        </div>
+      </div>
+      <div class="chat-item" onclick="showToast('→ Chat with Siddharth Kaur')">
+        <div class="chat-avatar" style="background:var(--green)">SK</div>
+        <div style="flex:1;min-width:0">
+          <div class="chat-name">Siddharth Kaur</div>
+          <div class="chat-preview">Thanks for the NCLT reference. Let's connect on this.</div>
+        </div>
+        <div class="chat-meta">
+          <div class="chat-time">Mon</div>
+        </div>
+      </div>
+      <div class="chat-item" onclick="showToast('→ Chat with Neha Prasad')">
+        <div class="chat-avatar" style="background:#5c1a4a">NP</div>
+        <div style="flex:1;min-width:0">
+          <div class="chat-name">Neha Prasad</div>
+          <div class="chat-preview">Your hidden response was insightful — family governance frameworks are really underestimated.</div>
+        </div>
+        <div class="chat-meta">
+          <div class="chat-time">Sun</div>
+        </div>
+      </div>
+    </div>
+    <div class="bottom-nav">
+      <button class="nav-item" onclick="setNav(this,'screen-feed')"><span class="icon">🏠</span>Feed</button>
+      <button class="nav-item" onclick="gotoScreen('screen-search')"><span class="icon">🔍</span>Search</button>
+      <button class="nav-item active"><span class="icon">💬</span>Chat</button>
+      <button class="nav-item" onclick="gotoScreen('screen-profile')"><span class="icon">👤</span>Profile</button>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════
+       SCREEN: ACTIVE CHAT
+  ════════════════════════════════ -->
+  <div class="screen" id="screen-active-chat">
+    <div class="status-bar">
+      <span>9:41</span>
+      <div class="status-icons">📶 🔋</div>
+    </div>
+    <div class="header">
+      <button class="back-btn" onclick="gotoScreen('screen-chat')">←</button>
+      <div class="chat-avatar" style="width:32px;height:32px;font-size:12px;flex-shrink:0">RV</div>
+      <div style="flex:1">
+        <div style="font-size:13.5px;font-weight:600;color:var(--ink)">Radhika Verma</div>
+        <div style="font-size:10px;color:var(--muted);font-family:'IBM Plex Mono',monospace">CA · Taxation</div>
+      </div>
+      <button class="header-btn" onclick="showToast('📞 Voice call — Phase 2 feature')">📞</button>
+      <button class="header-btn" onclick="showToast('📹 Video call — Phase 2 feature')">📹</button>
+    </div>
+    <div class="scroll-body">
+      <div class="chat-messages" id="chat-messages">
+        <div>
+          <div class="msg-bubble msg-in">Hi Aryan — your post on Sec. 56(2)(x) was very timely. We've been dealing with a similar restructuring.</div>
+          <div class="msg-time">9:12 AM</div>
+        </div>
+        <div>
+          <div class="msg-bubble msg-out">Thanks Radhika. The CBDT circular has been quite helpful for clients in the pharma sector specifically. What structure are you dealing with?</div>
+          <div class="msg-time out">9:18 AM</div>
+        </div>
+        <div>
+          <div class="msg-bubble msg-in">It's a holding-subsidiary share swap. FMV is being contested. Have you seen the AAR ruling from last month on similar facts?</div>
+          <div class="msg-time">9:31 AM</div>
+        </div>
+      </div>
+    </div>
+    <div class="chat-input-row">
+      <textarea class="chat-input" id="chat-input" placeholder="Message…" rows="1" onkeydown="handleChatKey(event)"></textarea>
+      <button class="chat-send" onclick="sendMessage()">↑</button>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════
+       SCREEN: COMMUNICATION HUB
+  ════════════════════════════════ -->
+  <div class="screen" id="screen-comms-hub">
+    <div class="status-bar">
+      <span>9:41</span>
+      <div class="status-icons">📶 🔋</div>
+    </div>
+    <div class="header">
+      <button class="back-btn" onclick="gotoScreen('screen-chat')">←</button>
+      <span class="header-logo">Comms Hub</span>
+    </div>
+    <div class="hub-tabs">
+      <button class="hub-tab active" onclick="setHubTab(this,'hub-calls')">Call Logs</button>
+      <button class="hub-tab" onclick="setHubTab(this,'hub-meetings')">Meetings</button>
+      <button class="hub-tab" onclick="setHubTab(this,'hub-history')">History</button>
+    </div>
+    <div class="scroll-body">
+      <div id="hub-calls">
+        <div class="call-log-item">
+          <span class="call-icon">📞</span>
+          <div>
+            <div class="call-name">Radhika Verma</div>
+            <div class="call-detail">Voice · Yesterday · 9:14 AM</div>
+          </div>
+          <div class="call-duration">12m 34s</div>
+        </div>
+        <div class="call-log-item">
+          <span class="call-icon">📹</span>
+          <div>
+            <div class="call-name">Siddharth Kaur</div>
+            <div class="call-detail">Video · Mon · 3:45 PM</div>
+          </div>
+          <div class="call-duration">28m 07s</div>
+        </div>
+        <div class="call-log-item">
+          <span class="call-icon" style="opacity:0.5">📞</span>
+          <div>
+            <div class="call-name" style="color:var(--muted)">Arjun Mehta</div>
+            <div class="call-detail">Missed · Sun · 11:22 AM</div>
+          </div>
+          <div class="call-duration" style="color:var(--red)">Missed</div>
+        </div>
+      </div>
+      <div id="hub-meetings" style="display:none">
+        <div class="section-label">Upcoming</div>
+        <div class="meeting-item">
+          <div class="meeting-title">CBDT Circular Discussion</div>
+          <div class="meeting-meta">Tomorrow · 11:00 AM · Video call · 45 min</div>
+          <div class="meeting-attendees">
+            <span class="att-chip">Radhika V.</span>
+            <span class="att-chip">You</span>
+          </div>
+        </div>
+        <div class="section-label">Past</div>
+        <div class="meeting-item" style="border-left-color:var(--muted);opacity:0.7">
+          <div class="meeting-title">IBC Update — CoC Strategy</div>
+          <div class="meeting-meta">Last Friday · 3:00 PM · Voice call · 30 min</div>
+          <div class="meeting-attendees">
+            <span class="att-chip">Siddharth K.</span>
+            <span class="att-chip">You</span>
+          </div>
+        </div>
+      </div>
+      <div id="hub-history" style="display:none">
+        <div class="empty-state">
+          <span class="big-icon">📂</span>
+          <p>Full chat history across all conversations — searchable. Phase 2 feature.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════
+       SCREEN: SEARCH
+  ════════════════════════════════ -->
+  <div class="screen" id="screen-search">
+    <div class="status-bar">
+      <span>9:41</span>
+      <div class="status-icons">📶 🔋</div>
+    </div>
+    <div class="header">
+      <button class="back-btn" onclick="gotoScreen('screen-feed')">←</button>
+      <span class="header-logo">Find Peers</span>
+    </div>
+    <div style="padding:12px 16px;border-bottom:1px solid var(--rule);flex-shrink:0">
+      <input type="text" placeholder="Search by expertise, name, or domain…" style="font-size:13.5px" oninput="filterSearch(this.value)">
+    </div>
+    <div class="scroll-body" id="search-results">
+      <div class="section-label">Chartered Accountants — Your Domain</div>
+      <div class="chat-item" onclick="showToast('→ Radhika Verma profile')">
+        <div class="chat-avatar">RV</div>
+        <div><div class="chat-name">Radhika Verma</div><div class="chat-preview" style="max-width:100%">Taxation · Transfer Pricing · FEMA</div></div>
+      </div>
+      <div class="chat-item" onclick="showToast('→ Arjun Mehta profile')">
+        <div class="chat-avatar" style="background:var(--gold)">AM</div>
+        <div><div class="chat-name">Arjun Mehta</div><div class="chat-preview" style="max-width:100%">Audit · Assurance · Listed Entities</div></div>
+      </div>
+      <div class="chat-item" onclick="showToast('→ Prakash Thakur profile')">
+        <div class="chat-avatar" style="background:#1a4a3a">PT</div>
+        <div><div class="chat-name">Prakash Thakur</div><div class="chat-preview" style="max-width:100%">International Taxation · Pillar Two · GloBE</div></div>
+      </div>
+      <div class="chat-item" onclick="showToast('→ Neha Prasad profile')">
+        <div class="chat-avatar" style="background:#5c1a4a">NP</div>
+        <div><div class="chat-name">Neha Prasad</div><div class="chat-preview" style="max-width:100%">Corporate Finance · PE · M&amp;A</div></div>
+      </div>
+    </div>
+    <div class="bottom-nav">
+      <button class="nav-item" onclick="setNav(this,'screen-feed')"><span class="icon">🏠</span>Feed</button>
+      <button class="nav-item active"><span class="icon">🔍</span>Search</button>
+      <button class="nav-item" onclick="gotoScreen('screen-chat')"><span class="icon">💬</span>Chat</button>
+      <button class="nav-item" onclick="gotoScreen('screen-profile')"><span class="icon">👤</span>Profile</button>
+    </div>
+  </div>
+
+</div><!-- end device -->
+
+<script>
+// ─── SCREEN NAVIGATION ───
+let currentScreen = 'screen-login';
+
+function gotoScreen(id) {
+  const prev = document.getElementById(currentScreen);
+  const next = document.getElementById(id);
+  if (!next) return;
+  prev.classList.remove('active');
+  prev.classList.add('slide-left');
+  setTimeout(() => prev.classList.remove('slide-left'), 300);
+  next.classList.add('active');
+  currentScreen = id;
+}
+
+function setNav(btn, screenId) {
+  gotoScreen(screenId);
+}
+
+// ─── FEED TOGGLE ───
+let feedState = 'same';
+function setFeedToggle(state) {
+  feedState = state;
+  document.getElementById('toggle-same').classList.toggle('active', state === 'same');
+  document.getElementById('toggle-inter').classList.toggle('active', state === 'inter');
+  if (state === 'inter') showToastInFeed('🌐 Showing inter-domain posts');
+  else showToastInFeed('🏠 Showing same-domain posts');
+}
+
+// ─── SCROLL HIDE/SHOW TOGGLE ───
+let lastScroll = 0;
+function handleFeedScroll() {
+  const el = document.getElementById('feed-scroll');
+  const toggleWrap = document.getElementById('feed-toggle-wrap');
+  const delta = el.scrollTop - lastScroll;
+  lastScroll = el.scrollTop;
+  if (el.scrollTop < 10) {
+    toggleWrap.classList.remove('hidden');
+  } else if (delta > 4) {
+    toggleWrap.classList.add('hidden');
+  } else if (delta < -4) {
+    toggleWrap.classList.remove('hidden');
+  }
+}
+
+// ─── COMPOSE ───
+function openCompose() {
+  document.getElementById('compose-overlay').classList.add('active');
+  document.getElementById('compose-sheet').classList.add('active');
+}
+function closeCompose() {
+  document.getElementById('compose-overlay').classList.remove('active');
+  document.getElementById('compose-sheet').classList.remove('active');
+}
+function setPostType(btn) {
+  btn.closest('.post-type-row').querySelectorAll('.type-pill').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+}
+function setBoom(btn) {
+  btn.closest('.boom-row').querySelectorAll('.boom-pill').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('ripple-config').style.display = btn.textContent.includes('Ripple') ? 'block' : 'none';
+}
+function submitPost() {
+  closeCompose();
+  showToastInFeed('✓ Post published to your domain feed');
+}
+
+// ─── REACTIONS ───
+function toggleReaction(btn) {
+  const wasActive = btn.classList.contains('active');
+  btn.closest('.reactions').querySelectorAll('.reaction-btn').forEach(b => b.classList.remove('active'));
+  if (!wasActive) btn.classList.add('active');
+}
+
+// ─── QUIZ ───
+let quizSelections = {};
+function selectQuizOpt(quizId, btn, idx) {
+  const container = document.getElementById(quizId);
+  container.querySelectorAll('.quiz-opt').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  quizSelections[quizId] = idx;
+}
+function submitQuiz(quizId, correctIdx) {
+  const sel = quizSelections[quizId];
+  if (sel === undefined) { showToastInFeed('Please select an answer first'); return; }
+  const container = document.getElementById(quizId);
+  const opts = container.querySelectorAll('.quiz-opt');
+  opts.forEach((b, i) => {
+    b.classList.remove('selected');
+    if (i === correctIdx) b.classList.add('correct');
+  });
+  opts.forEach(b => b.disabled = true);
+  document.getElementById(quizId + '-submit').disabled = true;
+  document.getElementById(quizId + '-submit').style.opacity = '0.5';
+  document.getElementById(quizId + '-result').style.display = 'block';
+}
+
+// ─── TOAST (feed screen) ───
+function showToastInFeed(msg) {
+  const t = document.getElementById('toast');
+  if (!t) return;
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2600);
+}
+function showToast(msg) {
+  // show in current screen — fallback to feed toast or alert
+  const feedToast = document.getElementById('toast');
+  if (feedToast) {
+    feedToast.textContent = msg;
+    feedToast.classList.add('show');
+    setTimeout(() => feedToast.classList.remove('show'), 2600);
+  }
+}
+
+// ─── SETTINGS TOGGLES ───
+function toggleSwitch(el) {
+  el.classList.toggle('on');
+}
+
+// ─── KYC PROFESSION SELECT ───
+function selectProf(btn) {
+  btn.closest('.profession-grid').querySelectorAll('.prof-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+// ─── CHAT ───
+function handleChatKey(e) {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+}
+function sendMessage() {
+  const input = document.getElementById('chat-input');
+  const text = input.value.trim();
+  if (!text) return;
+  const container = document.getElementById('chat-messages');
+  const wrapper = document.createElement('div');
+  const bubble = document.createElement('div');
+  bubble.className = 'msg-bubble msg-out';
+  bubble.textContent = text;
+  const time = document.createElement('div');
+  time.className = 'msg-time out';
+  time.textContent = 'Just now';
+  wrapper.appendChild(bubble);
+  wrapper.appendChild(time);
+  container.appendChild(wrapper);
+  input.value = '';
+  container.parentElement.scrollTop = container.parentElement.scrollHeight;
+}
+
+// ─── COMMS HUB TABS ───
+function setHubTab(btn, targetId) {
+  btn.closest('.hub-tabs').querySelectorAll('.hub-tab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  ['hub-calls','hub-meetings','hub-history'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.style.display = id === targetId ? 'block' : 'none';
+  });
+}
+
+// ─── SEARCH FILTER ───
+function filterSearch(q) {
+  // simple show/hide simulation
+  const items = document.querySelectorAll('#search-results .chat-item');
+  items.forEach(item => {
+    const text = item.textContent.toLowerCase();
+    item.style.display = (!q || text.includes(q.toLowerCase())) ? 'flex' : 'none';
+  });
+}
+</script>
+</body>
+</html>
